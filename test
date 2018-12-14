@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Q1 - Online Resume</title>
+</head>
+
+<body bgcolor="black">
+	<br><br>
+	<table align="center" width="1100" bgcolor="white" border="10">
+		<tr>
+			<td width="250" bgcolor="white"><img src="lelis.jpeg" alt="picture" width="250" height="250"></td>
+			<td width="850" bgcolor="black"><img src="banner.jpg" alt="banner" width="850" height="250"></td>
+		</tr>
+	</table>
+	
+	<br>
+	
+	<table align="center" width="1100" bgcolor="black">
+		<tr>
+		<td>
+			<table align="center" width="265" bgcolor="white" border="10">
+				<tr>
+					<td bgcolor="#dedbdb">
+						<font size="4" color="black">
+							<br><b>&nbsp;&nbsp;&nbsp;Place of Birth:</b> Silang Cavite
+							<br><br><b>&nbsp;&nbsp;&nbsp;Date of Birth:</b> Feb 2, 1999
+							<br><br><b>&nbsp;&nbsp;&nbsp;Gender:</b> Female
+							<br><br><b>&nbsp;&nbsp;&nbsp;Nationality:</b> Filipino
+							<br><br><b>&nbsp;&nbsp;&nbsp;Height:</b> 1.49 m
+							<br><br><b>&nbsp;&nbsp;&nbsp;Weight:</b> 39 kg
+							<br><br><b>&nbsp;&nbsp;&nbsp;Status:</b> Single
+							<br><br><b>&nbsp;&nbsp;&nbsp;Religion:</b> Roman Catholic
+							<br><br><br><br><br><br><br><br><br><br>
+						</font>
+					</td>
+				</tr>
+			</table>
+		</td>
+		
+		<td></td>
+		
+		<td>
+			<table align="center" width="830" bgcolor="white" border="10">
+				<tr>
+					<td width="800" bgcolor="#dedbdb">
+						<h2>&nbsp;&nbsp;&nbsp;&nbsp;SKILLS</h2>
+						<ul>
+						<li><font size="4" color="black"><b>Languages:</b> C++, C, HTML, Java, Assembly language, Python, FoxPro</font></li>
+						<li><font size="4" color="black"><b>Programming Tools:</b> Turbo C, Visual Basic, NetBeans, Eclipse, FoxPro, PyCharm, Emu8086</font></li>
+						<li><font size="4" color="black"><b>Multimedia and Graphics:</b> Adobe Photoshop, Adobe Illustrator, Adobe Animate</font></li>
+						<li><font size="4" color="black"><b>Microsoft Office Tools:</b> Word, Excel, Publisher, PowerPoint</font></li>
+						</ul>
+						<br><br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+					<table align="center" width="830" bgcolor="white">
+						<tr>
+							<td bgcolor="#dedbdb">
+								<h2>&nbsp;&nbsp;&nbsp;&nbsp;EDUCATION</h2>
+								<font size="4" color="black">
+									<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Technological University of the Philippines</b>
+									<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bachelor of Science in Computer Science
+									<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ayala Blvd., Ermita, Manila
+									<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2015 - Current
+									<br><br>
+								</font>
+							</td>
+						</tr>
+						<tr>
+							<td>
+							<table align="center" width="830" bgcolor="white">
+								<tr>
+								<td width="280" bgcolor="#dedbdb">
+									<font size="4" color="black">
+										<br><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Philippine Christian University</b>
+										<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1st year- 4th year High school
+										<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dasmariñas City, Cavite
+										<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2011 - 2015
+										<br><br>
+									</font>
+								</td>
+								<td width="400" bgcolor="#dedbdb">
+									<font size="4" color="black">
+										<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bulihan Sites and Services Project Elementary School</b> 
+										<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Elementary
+										<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bulihan Silang, Cavite 
+										<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2005 - 2011
+									</font>
+								</td>
+								</tr>
+							</table>
+							</td>
+						</tr>
+					</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+		</tr>
+	</table>
+	<br>
+	
+</body>
+
+</html>
