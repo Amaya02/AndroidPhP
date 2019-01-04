@@ -14,9 +14,9 @@
             $this->db = new DbConnect();
         }
         
-        public function addTransaction($userid, $transacid,$status,$date,$start,$end){
+        public function addTransaction($userid, $transacid,$status,$date,$start){
 
-            $query = "insert into ".$this->db_table."(userid, transacid, status, date_tran, esti_date, esti_start, esti_end) values ('$userid', '$transacid', '$status', NOW(), '$date', '$start', '$end')";
+            $query = "insert into ".$this->db_table."(userid, transacid, status, date_tran, esti_date, esti_start) values ('$userid', '$transacid', '$status', NOW(), '$date', '$start')";
                 
             $inserted = mysqli_query($this->db->getDb(), $query);
                 
@@ -37,18 +37,17 @@
 
         public function getTransaction($userid, $status){
 
-            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.esti_end, user_transac.status, transaction.transacname, transaction.companyid, company.companyname from ".$this->db_table." INNER JOIN ".$this->db_table2." ON user_transac.transacid=transaction.transacid INNER JOIN ".$this->db_table3." ON transaction.companyid=company.companyid where user_transac.userid='$userid' AND user_transac.status='$status'";
+            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.companyid, company.companyname from ".$this->db_table." INNER JOIN ".$this->db_table2." ON user_transac.transacid=transaction.transacid INNER JOIN ".$this->db_table3." ON transaction.companyid=company.companyid where user_transac.userid='$userid' AND user_transac.status='$status'";
 
             $i = mysqli_query($this->db->getDb(), $query);
 
             $num_rows = mysqli_num_rows($i);
             while($row = mysqli_fetch_array($i)){
-
                 $r[]=$row;
             }
 
             if($num_rows==0){
-                $r[$num_rows]['result']="empty";
+                $r[0]['result']="empty";
                 return $r;
             }
             else{
@@ -59,7 +58,9 @@
             mysqli_close($this->db->getDb());
         }
 
-        public function confirmTransaction($starttime,$endtime,$estitime){
+        public function confirmTransaction($starttime,$endtime,$estitime,$transacid){
+            $r2 = array();
+            $status = "Pending";
             date_default_timezone_set('Asia/Singapore');
             $date = date('Y-m-d');
             $time = date('H:i');
@@ -67,301 +68,1309 @@
             $min = (int)substr($starttime,3,4);
             $hour1 = (int)substr($endtime,0,2);
             $min1 = (int)substr($endtime,3,4);
-            $esti=(int)$estitime;
-            $query = "select * from user_transac order by u_tranid desc limit 1";
+
+            $query = "select * from user_transac where transacid = '$transacid' and status = '$status'";
 
             $i = mysqli_query($this->db->getDb(), $query);
             $num_rows = mysqli_num_rows($i);
             while($row = mysqli_fetch_array($i)){
-
                 $r[]=$row;
             }
 
+            $r2[0]['date_now'] = date('Y-m-d');
+            $r2[0]['time_now'] = date('H:i:s');
+
             if($num_rows==0){
-               if(date('H')<$hour){
-                    $row[0]['estistart']=$starttime;
-                    $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                    $row[0]['esti_date']=$date;
-               }
-               else if(date('H')==$hour){
+                if(date('H')<$hour){
+                    $date2 = $starttime;
+                    $hour2 = (int)substr($date2,0,2);
+                    $min2 = (int)substr($date2,3,4);
+                    $r2[0]['esti_date'] = date('Y-m-d');
+                    $r2[0]['estistart'] = $date2;
+                    $x=true;
+                    $count=1;
+                    while($x){
+                        if($hour2>$hour1){
+                            $x = false;
+                        }
+                        else if($hour2==$hour1){
+                            if($min2<$min1){
+                                $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                $hour2 = (int)substr($date2,0,2);
+                                $min2 = (int)substr($date2,3,4);
+                                $r2[$count]['estistart'] = $date2;
+                                $count++;
+                            }
+                            else{
+                                $x=false;
+                            }
+                        }
+                        else{
+                            $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[$count]['estistart'] = $date2;
+                            $count++;
+                        }
+                    }
+                }
+                else if(date('H')==$hour){
                     if($hour==$hour1){
                         if(date('i')<=$min){
-                            $row[0]['estistart']=$starttime;
-                            $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                            $row[0]['esti_date']=$date;
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d');
+                            $r2[0]['estistart'] = $date2;
+                            $x=true;
+                            $count=1;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $r2[$count]['estistart'] = $date2;
+                                    $count++;
+                                }
+                            }
+                        }
+                        else if(date('i')<=$min1){
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = $date;
+                            $x=true;
+                            $count=0;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        if($hour2>=date('H')){
+                                            if($hour2==date('H')){
+                                                if($min2>=date('i')){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                            else{
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }     
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                        else{
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }  
+                                }
+                            }
                         }
                         else{
-                            if(date('i')<=$min1){
-                                $row[0]['estistart']=date('H:i');
-                                $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                            else{
-                                $row[0]['estistart']=$starttime;
-                                $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d',strtotime($date. ' + 1 days'));
+                            $r2[0]['estistart'] = $date2;
+                            $x=true;
+                            $count=1;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $r2[$count]['estistart'] = $date2;
+                                    $count++;
+                                }
                             }
                         }
                     }
                     else{
                         if(date('i')<=$min){
-                            $row[0]['estistart']=$starttime;
-                            $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                            $row[0]['esti_date']=$date;
-                        }
-                        else{
-                            $row[0]['estistart']=date('H:i');
-                            $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                            $row[0]['esti_date']=$date;
-                        }
-                    } 
-               }
-               else{
-                    if(date('H')<$hour1){
-                        $row[0]['estistart']=date('H:i');
-                        $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                        $row[0]['esti_date']=$date;
-                    }
-                    else if(date('H')==$hour1){
-                        if(date('i')<=$min1){
-                            $row[0]['estistart']=date('H:i');
-                            $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                            $row[0]['esti_date']=$date;
-                        }
-                        else{
-                            $row[0]['estistart']=$starttime;
-                            $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                            $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
-                        }
-                    }
-                    else{
-                        $row[0]['estistart']=$starttime;
-                        $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                        $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
-                    }
-               }
-            }
-            else{
-                $hour3 = (int)substr($r[0]['esti_end'],0,2);
-                $min3 =  (int)substr($r[0]['esti_end'],3,4);
-                if($date==$r[0]['esti_date']){
-                    if(date('H')<$hour){
-                        $row[0]['estistart']=$r[0]['esti_end'];
-                        $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                        $row[0]['esti_date']=$date;
-                    }
-                    else if(date('H')==$hour){
-                        if($hour==$hour1){
-                            if(date('i')<=$min){
-                                $row[0]['estistart']=$r[0]['esti_end'];
-                                $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                            else{
-                                if(date('i')<=$min1){
-                                    if(date('i')<=$min3){
-                                        $row[0]['estistart']=$r[0]['esti_end'];
-                                        $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=$date;
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d');
+                            $r2[0]['estistart'] = $date2;
+                            $x=true;
+                            $count=1;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
                                     }
                                     else{
-                                        $row[0]['estistart']=date('H:i');
-                                        $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=$date;
+                                        $x=false;
                                     }
                                 }
                                 else{
-                                    $row[0]['estistart']=$starttime;
-                                    $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $r2[$count]['estistart'] = $date2;
+                                    $count++;
                                 }
                             }
                         }
                         else{
-                            if(date('i')<=$min){
-                                $row[0]['estistart']=$r[0]['esti_end'];
-                                $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                            else{
-                                if(date('H')<$hour3){
-                                    $row[0]['estistart']=$r[0]['esti_end'];
-                                    $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$date;
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = $date;
+                            $x=true;
+                            $count=0;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
                                 }
-                                else if(date('H')==$hour3){
-                                    if(date('i')<=$min3){
-                                        $row[0]['estistart']=$r[0]['esti_end'];
-                                        $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=$date;
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        if($hour2>=date('H')){
+                                            if($hour2==date('H')){
+                                                if($min2>=date('i')){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                            else{
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }  
                                     }
                                     else{
-                                        $row[0]['estistart']=date('H:i');
-                                        $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=$date;
+                                        $x=false;
                                     }
                                 }
                                 else{
-                                    $row[0]['estistart']=date('H:i');
-                                    $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$date;
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                        else{
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }  
                                 }
                             }
-                        }
-                    }
-                    else{
-                        if(date('H')<$hour1){
-                            if(date('H')<$hour3){
-                                $row[0]['estistart']=$r[0]['esti_end'];
-                                $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                            else if(date('H')==$hour3){
-                                if(date('i')<=$min3){
-                                    $row[0]['estistart']=$r[0]['esti_end'];
-                                    $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$date;
-                                }
-                                else{
-                                    $row[0]['estistart']=date('H:i');
-                                    $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$date;
-                                }
-                            }
-                            else{
-                                $row[0]['estistart']=date('H:i');
-                                $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                        }
-                        else if(date('H')==$hour1){
-                            if(date('i')<=$min1){
-                                if(date('H')<$hour3){
-                                    $row[0]['estistart']=$r[0]['esti_end'];
-                                    $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$date;
-                                }
-                                else if(date('H')==$hour3){
-                                    if(date('i')<=$min3){
-                                        $row[0]['estistart']=$r[0]['esti_end'];
-                                        $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=$date;
-                                    }
-                                    else{
-                                        $row[0]['estistart']=date('H:i');
-                                        $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=$date;
-                                    }
-                                }
-                                else{
-                                    $row[0]['estistart']=date('H:i');
-                                    $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$date;
-                                }
-                            }
-                            else{
-                                $row[0]['estistart']=$starttime;
-                                $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
-                            }
-                        }
-                        else{
-                            $row[0]['estistart']=$starttime;
-                            $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                            $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
                         }
                     }
                 }
                 else{
-                    if(date('H')<$hour){
-                        $row[0]['estistart']=$starttime;
-                        $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                        $row[0]['esti_date']=$date;
-                   }
-                   else if(date('H')==$hour){
-                        if($hour==$hour1){
-                            if(date('i')<=$min){
-                                $row[0]['estistart']=$starttime;
-                                $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
+                    if(date('H')<$hour1){
+                        $date2 = $starttime;
+                        $hour2 = (int)substr($date2,0,2);
+                        $min2 = (int)substr($date2,3,4);
+                        $r2[0]['esti_date'] = $date;
+                        $x=true;
+                        $count=0;
+                        while($x){
+                            if($hour2>$hour1){
+                                $x = false;
                             }
-                            else{
-                                if(date('i')<=$min1){
-                                    $row[0]['estistart']=date('H:i');
-                                    $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$date;
+                            else if($hour2==$hour1){
+                                if($min2<$min1){
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                        else{
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }       
                                 }
                                 else{
-                                    $dateX = date('Y-m-d',strtotime($date. ' + 1 days'));
-                                    if($dateX == $r[0]['esti_date']){
-                                        $row[0]['estistart']=$r[0]['esti_end'];
-                                        $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=$dateX;
+                                    $x=false;
+                                }
+                            }
+                            else{
+                                $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                $hour2 = (int)substr($date2,0,2);
+                                $min2 = (int)substr($date2,3,4);
+                                if($hour2>=date('H')){
+                                    if($hour2==date('H')){
+                                        if($min2>=date('i')){
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
                                     }
                                     else{
-                                        $row[0]['estistart']=$starttime;
-                                        $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                        $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                }  
+                            }
+                        }
+                    }
+                    else if(date('H')==$hour1){
+                        if(date('i')<=$min1){
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = $date;
+                            $x=true;
+                            $count=0;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        if($hour2>=date('H')){
+                                            if($hour2==date('H')){
+                                                if($min2>=date('i')){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                            else{
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }     
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                        else{
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }  
+                                }
+                            }
+                        }
+                        else{
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d',strtotime($date. ' + 1 days'));
+                            $r2[0]['estistart'] = $date2;
+                            $x=true;
+                            $count=1;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $r2[$count]['estistart'] = $date2;
+                                    $count++;
+                                }
+                            }
+                        }
+
+                    }
+                    else if(date('H')>$hour1){
+                        $date2 = $starttime;
+                        $hour2 = (int)substr($date2,0,2);
+                        $min2 = (int)substr($date2,3,4);
+                        $r2[0]['esti_date'] = date('Y-m-d',strtotime($date. ' + 1 days'));
+                        $r2[0]['estistart'] = $date2;
+                        $x=true;
+                        $count=1;
+                        while($x){
+                            if($hour2>$hour1){
+                                $x = false;
+                            }
+                            else if($hour2==$hour1){
+                                if($min2<$min1){
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $r2[$count]['estistart'] = $date2;
+                                    $count++;
+                                }
+                                else{
+                                    $x=false;
+                                }
+                            }
+                            else{
+                                $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                $hour2 = (int)substr($date2,0,2);
+                                $min2 = (int)substr($date2,3,4);
+                                $r2[$count]['estistart'] = $date2;
+                                $count++;
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                if(date('H')<$hour){
+                    $date2 = $starttime;
+                    $hour2 = (int)substr($date2,0,2);
+                    $min2 = (int)substr($date2,3,4);
+                    $r2[0]['esti_date'] = date('Y-m-d');
+                    $x=true;
+                    $er = 0;
+                    for($i =0; $i<count($r);$i++){
+                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                            if($hour2 ==$h && $m == $min2){
+                                $er++;
+                            }
+                        }
+                    }
+                    if($er<=0){
+                        $r2[0]['estistart'] = $date2;
+                        $count=1;
+                    }
+                    else{
+                        $count=0;
+                    }
+                    while($x){
+                        if($hour2>$hour1){
+                            $x = false;
+                        }
+                        else if($hour2==$hour1){
+                            if($min2<$min1){
+                                $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                $hour2 = (int)substr($date2,0,2);
+                                $min2 = (int)substr($date2,3,4);
+                                $er = 0;
+                                for($i =0; $i<count($r);$i++){
+                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                        if($hour2 ==$h && $m == $min2){
+                                            $er++;
+                                        }
+                                    }
+                                }
+                                if($er<=0){
+                                    $r2[$count]['estistart'] = $date2;
+                                    $count++;
+                                }
+                            }
+                            else{
+                                $x=false;
+                            }
+                        }
+                        else{
+                            $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $er=0;
+                            for($i=0; $i<count($r);$i++){
+                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                    if($hour2 ==$h && $m == $min2){
+                                        $er++;
+                                    }
+                                    
+                                }
+                            }
+                            if($er<=0){
+                                $r2[$count]['estistart'] = $date2;
+                                $count++;
+                            }
+                        }
+                    }
+                }
+                else if(date('H')==$hour){
+                    if($hour==$hour1){
+                        if(date('i')<=$min){
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d');
+                            $x=true;
+                            $er = 0;
+                            for($i =0; $i<count($r);$i++){
+                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                    if($hour2 ==$h && $m == $min2){
+                                        $er++;
+                                    }
+                                }
+                            }
+                            if($er<=0){
+                                $r2[0]['estistart'] = $date2;
+                                $count=1;
+                            }
+                            else{
+                                $count=0;
+                            }
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $er = 0;
+                                        for($i =0; $i<count($r);$i++){
+                                            if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                if($hour2 ==$h && $m == $min2){
+                                                    $er++;
+                                                }
+                                            }
+                                        }
+                                        if($er<=0){
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $er=0;
+                                    for($i=0; $i<count($r);$i++){
+                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                            if($hour2 ==$h && $m == $min2){
+                                                $er++;
+                                            }
+                                            
+                                        }
+                                    }
+                                    if($er<=0){
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                }
+                            }
+                        }
+                        else if(date('i')<=$min1){
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = $date;
+                            $x=true;
+                            $count=0;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        if($hour2>=date('H')){
+                                            if($hour2==date('H')){
+                                                if($min2>=date('i')){
+                                                    $er=0;
+                                                    for($i=0; $i<count($r);$i++){
+                                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                            if($hour2 ==$h && $m == $min2){
+                                                                $er++;
+                                                            }
+                                                            
+                                                        }
+                                                    }
+                                                    if($er<=0){
+                                                        $r2[$count]['estistart'] = $date2;
+                                                        $count++;
+                                                    }
+                                                }
+                                            }
+                                            else{
+                                                $er=0;
+                                                for($i=0; $i<count($r);$i++){
+                                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                        if($hour2 ==$h && $m == $min2){
+                                                            $er++;
+                                                        }
+                                                        
+                                                    }
+                                                }
+                                                if($er<=0){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                        }  
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $er=0;
+                                                for($i=0; $i<count($r);$i++){
+                                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                        if($hour2 ==$h && $m == $min2){
+                                                            $er++;
+                                                        }
+                                                        
+                                                    }
+                                                }
+                                                if($er<=0){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                        }
+                                        else{
+                                            $er=0;
+                                            for($i=0; $i<count($r);$i++){
+                                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                    if($hour2 ==$h && $m == $min2){
+                                                        $er++;
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            if($er<=0){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                    }  
+                                }
+                            }
+                        }
+                        else{
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d',strtotime($date. ' + 1 days'));
+                            $x=true;
+                            $er = 0;
+                            for($i =0; $i<count($r);$i++){
+                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                    if($hour2 ==$h && $m == $min2){
+                                        $er++;
+                                    }
+                                }
+                            }
+                            if($er<=0){
+                                $r2[0]['estistart'] = $date2;
+                                $count=1;
+                            }
+                            else{
+                                $count=0;
+                            }
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $er = 0;
+                                        for($i =0; $i<count($r);$i++){
+                                            if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                if($hour2 ==$h && $m == $min2){
+                                                    $er++;
+                                                }
+                                            }
+                                        }
+                                        if($er<=0){
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $er=0;
+                                    for($i=0; $i<count($r);$i++){
+                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                            if($hour2 ==$h && $m == $min2){
+                                                $er++;
+                                            }
+                                            
+                                        }
+                                    }
+                                    if($er<=0){
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        if(date('i')<=$min){
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d');
+                            $x=true;
+                            $er = 0;
+                            for($i =0; $i<count($r);$i++){
+                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                    if($hour2 ==$h && $m == $min2){
+                                        $er++;
+                                    }
+                                }
+                            }
+                            if($er<=0){
+                                $r2[0]['estistart'] = $date2;
+                                $count=1;
+                            }
+                            else{
+                                $count=0;
+                            }
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $er = 0;
+                                        for($i =0; $i<count($r);$i++){
+                                            if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                if($hour2 ==$h && $m == $min2){
+                                                    $er++;
+                                                }
+                                            }
+                                        }
+                                        if($er<=0){
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $er=0;
+                                    for($i=0; $i<count($r);$i++){
+                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                            if($hour2 ==$h && $m == $min2){
+                                                $er++;
+                                            }
+                                            
+                                        }
+                                    }
+                                    if($er<=0){
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
                                     }
                                 }
                             }
                         }
                         else{
-                            if(date('i')<=$min){
-                                $row[0]['estistart']=$starttime;
-                                $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                            else{
-                                $row[0]['estistart']=date('H:i');
-                                $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                        } 
-                   }
-                   else{
-                        if(date('H')<$hour1){
-                            $row[0]['estistart']=date('H:i');
-                            $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                            $row[0]['esti_date']=$date;
-                        }
-                        else if(date('H')==$hour1){
-                            if(date('i')<=$min1){
-                                $row[0]['estistart']=date('H:i');
-                                $row[0]['estiend']=date('H:i',strtotime($time. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$date;
-                            }
-                            else{
-                                $dateX = date('Y-m-d',strtotime($date. ' + 1 days'));
-                                if($dateX == $r[0]['esti_date']){
-                                    $row[0]['estistart']=$r[0]['esti_end'];
-                                    $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=$dateX;
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = $date;
+                            $x=true;
+                            $count=0;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        if($hour2>=date('H')){
+                                            if($hour2==date('H')){
+                                                if($min2>=date('i')){
+                                                    $er=0;
+                                                    for($i=0; $i<count($r);$i++){
+                                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                            if($hour2 ==$h && $m == $min2){
+                                                                $er++;
+                                                            }
+                                                            
+                                                        }
+                                                    }
+                                                    if($er<=0){
+                                                        $r2[$count]['estistart'] = $date2;
+                                                        $count++;
+                                                    }
+                                                }
+                                            }
+                                            else{
+                                                $er=0;
+                                                for($i=0; $i<count($r);$i++){
+                                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                        if($hour2 ==$h && $m == $min2){
+                                                            $er++;
+                                                        }
+                                                        
+                                                    }
+                                                }
+                                                if($er<=0){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                        }  
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
                                 }
                                 else{
-                                    $row[0]['estistart']=$starttime;
-                                    $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                    $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $er=0;
+                                                for($i=0; $i<count($r);$i++){
+                                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                        if($hour2 ==$h && $m == $min2){
+                                                            $er++;
+                                                        }
+                                                        
+                                                    }
+                                                }
+                                                if($er<=0){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                        }
+                                        else{
+                                            $er=0;
+                                            for($i=0; $i<count($r);$i++){
+                                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                    if($hour2 ==$h && $m == $min2){
+                                                        $er++;
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            if($er<=0){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                    }  
+                                }
+                            }
+                        }
+                    }
+                }
+                else{
+                    if(date('H')<$hour1){
+                        $date2 = $starttime;
+                        $hour2 = (int)substr($date2,0,2);
+                        $min2 = (int)substr($date2,3,4);
+                        $r2[0]['esti_date'] = $date;
+                        $x=true;
+                        $count=0;
+                        while($x){
+                            if($hour2>$hour1){
+                                $x = false;
+                            }
+                            else if($hour2==$hour1){
+                                if($min2<$min1){
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $er=0;
+                                                for($i=0; $i<count($r);$i++){
+                                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                        if($hour2 ==$h && $m == $min2){
+                                                            $er++;
+                                                        }
+                                                        
+                                                    }
+                                                }
+                                                if($er<=0){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                        }
+                                        else{
+                                            $er=0;
+                                            for($i=0; $i<count($r);$i++){
+                                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                    if($hour2 ==$h && $m == $min2){
+                                                        $er++;
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            if($er<=0){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                    }  
+                                }
+                                else{
+                                    $x=false;
+                                }
+                            }
+                            else{
+                                $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                $hour2 = (int)substr($date2,0,2);
+                                $min2 = (int)substr($date2,3,4);
+                                if($hour2>=date('H')){
+                                    if($hour2==date('H')){
+                                        if($min2>=date('i')){
+                                            $er=0;
+                                            for($i=0; $i<count($r);$i++){
+                                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                    if($hour2 ==$h && $m == $min2){
+                                                        $er++;
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            if($er<=0){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                    }
+                                    else{
+                                        $er=0;
+                                        for($i=0; $i<count($r);$i++){
+                                            if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                if($hour2 ==$h && $m == $min2){
+                                                    $er++;
+                                                }
+                                                
+                                            }
+                                        }
+                                        if($er<=0){
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }
+                                }  
+                            }
+                        }
+                    }
+                    else if(date('H')==$hour1){
+                        if(date('i')<=$min1){
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = $date;
+                            $x=true;
+                            $count=0;
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        if($hour2>=date('H')){
+                                            if($hour2==date('H')){
+                                                if($min2>=date('i')){
+                                                    $er=0;
+                                                    for($i=0; $i<count($r);$i++){
+                                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                            if($hour2 ==$h && $m == $min2){
+                                                                $er++;
+                                                            }
+                                                            
+                                                        }
+                                                    }
+                                                    if($er<=0){
+                                                        $r2[$count]['estistart'] = $date2;
+                                                        $count++;
+                                                    }
+                                                }
+                                            }
+                                            else{
+                                                $er=0;
+                                                for($i=0; $i<count($r);$i++){
+                                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                        if($hour2 ==$h && $m == $min2){
+                                                            $er++;
+                                                        }
+                                                        
+                                                    }
+                                                }
+                                                if($er<=0){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                        }  
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    if($hour2>=date('H')){
+                                        if($hour2==date('H')){
+                                            if($min2>=date('i')){
+                                                $er=0;
+                                                for($i=0; $i<count($r);$i++){
+                                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                        if($hour2 ==$h && $m == $min2){
+                                                            $er++;
+                                                        }
+                                                        
+                                                    }
+                                                }
+                                                if($er<=0){
+                                                    $r2[$count]['estistart'] = $date2;
+                                                    $count++;
+                                                }
+                                            }
+                                        }
+                                        else{
+                                            $er=0;
+                                            for($i=0; $i<count($r);$i++){
+                                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                    if($hour2 ==$h && $m == $min2){
+                                                        $er++;
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            if($er<=0){
+                                                $r2[$count]['estistart'] = $date2;
+                                                $count++;
+                                            }
+                                        }
+                                    }  
                                 }
                             }
                         }
                         else{
-                            $dateX = date('Y-m-d',strtotime($date. ' + 1 days'));
-                            if($dateX == $r[0]['esti_date']){
-                                $row[0]['estistart']=$r[0]['esti_end'];
-                                $row[0]['estiend']=date('H:i',strtotime($r[0]['esti_end']. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=$dateX;
+                            $date2 = $starttime;
+                            $hour2 = (int)substr($date2,0,2);
+                            $min2 = (int)substr($date2,3,4);
+                            $r2[0]['esti_date'] = date('Y-m-d',strtotime($date. ' + 1 days'));
+                            $x=true;
+                            $er = 0;
+                            for($i =0; $i<count($r);$i++){
+                                if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                    $h = (int)substr($r[$i]['esti_start'],0,2);
+                                    $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                    if($hour2 ==$h && $m == $min2){
+                                        $er++;
+                                    }
+                                }
+                            }
+                            if($er<=0){
+                                $r2[0]['estistart'] = $date2;
+                                $count=1;
                             }
                             else{
-                                $row[0]['estistart']=$starttime;
-                                $row[0]['estiend']=date('H:i',strtotime($starttime. ' + '.$estitime.' minutes'));
-                                $row[0]['esti_date']=date('Y-m-d',strtotime($date. ' + 1 days'));
+                                $count=0;
+                            }
+                            while($x){
+                                if($hour2>$hour1){
+                                    $x = false;
+                                }
+                                else if($hour2==$hour1){
+                                    if($min2<$min1){
+                                        $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                        $hour2 = (int)substr($date2,0,2);
+                                        $min2 = (int)substr($date2,3,4);
+                                        $er = 0;
+                                        for($i =0; $i<count($r);$i++){
+                                            if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                                $h = (int)substr($r[$i]['esti_start'],0,2);
+                                                $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                                if($hour2 ==$h && $m == $min2){
+                                                    $er++;
+                                                }
+                                            }
+                                        }
+                                        if($er<=0){
+                                            $r2[$count]['estistart'] = $date2;
+                                            $count++;
+                                        }
+                                    }
+                                    else{
+                                        $x=false;
+                                    }
+                                }
+                                else{
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $er=0;
+                                    for($i=0; $i<count($r);$i++){
+                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                            if($hour2 ==$h && $m == $min2){
+                                                $er++;
+                                            }
+                                            
+                                        }
+                                    }
+                                    if($er<=0){
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                }
                             }
                         }
-                   }
+
+                    }
+                    else if(date('H')>$hour1){
+                        $date2 = $starttime;
+                        $hour2 = (int)substr($date2,0,2);
+                        $min2 = (int)substr($date2,3,4);
+                        $r2[0]['esti_date'] = date('Y-m-d',strtotime($date. ' + 1 days'));
+                        $x=true;
+                        $er = 0;
+                        for($i =0; $i<count($r);$i++){
+                            if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                $h = (int)substr($r[$i]['esti_start'],0,2);
+                                $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                if($hour2 ==$h && $m == $min2){
+                                    $er++;
+                                }
+                            }
+                        }
+                        if($er<=0){
+                            $r2[0]['estistart'] = $date2;
+                            $count=1;
+                        }
+                        else{
+                            $count=0;
+                        }
+                        while($x){
+                            if($hour2>$hour1){
+                                $x = false;
+                            }
+                            else if($hour2==$hour1){
+                                if($min2<$min1){
+                                    $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                    $hour2 = (int)substr($date2,0,2);
+                                    $min2 = (int)substr($date2,3,4);
+                                    $er = 0;
+                                    for($i =0; $i<count($r);$i++){
+                                        if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                            $h = (int)substr($r[$i]['esti_start'],0,2);
+                                            $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                            if($hour2 ==$h && $m == $min2){
+                                                $er++;
+                                            }
+                                        }
+                                    }
+                                    if($er<=0){
+                                        $r2[$count]['estistart'] = $date2;
+                                        $count++;
+                                    }
+                                }
+                                else{
+                                    $x=false;
+                                }
+                            }
+                            else{
+                                $date2 = date('H:i:s',strtotime($date2. ' + '.$estitime.' minutes'));
+                                $hour2 = (int)substr($date2,0,2);
+                                $min2 = (int)substr($date2,3,4);
+                                $er=0;
+                                for($i=0; $i<count($r);$i++){
+                                    if($r2[0]['esti_date'] == $r[$i]['esti_date']){
+                                        $h = (int)substr($r[$i]['esti_start'],0,2);
+                                        $m =  (int)substr($r[$i]['esti_start'],3,4);
+                                        if($hour2 ==$h && $m == $min2){
+                                            $er++;
+                                        }
+                                        
+                                    }
+                                }
+                                if($er<=0){
+                                    $r2[$count]['estistart'] = $date2;
+                                    $count++;
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            return $row;
+
+            return $r2;
+
         }
+
+        
     }
 ?>

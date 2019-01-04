@@ -6,7 +6,6 @@
     $status = "";
     $date = "";
     $start = "";
-    $end= "";
 
     if(isset($_POST['userid'])){
         
@@ -38,15 +37,10 @@
         
     }
 
-    if(isset($_POST['end'])){
-        
-        $end = $_POST['end'];
-        
-    }
     
     $userObject = new User();
 
-    $json_array = $userObject->addTransaction($userid,$transacid,$status,$date,$start,$end);
+    $json_array = $userObject->addTransaction($userid,$transacid,$status,$date,$start);
         
     echo json_encode($json_array);
 

@@ -24,6 +24,9 @@
                 while($row = mysqli_fetch_array($result)) {
                     $data['id'] = $row['id'];
                     $data['username'] = $row['username'];
+                    $data['fname'] = $row['fname'];
+                    $data['lname'] = $row['lname'];
+                    $data['num'] = $row['num'];
                     $data['email'] = $row['email'];
                     $data['password'] = $row['password'];
 
@@ -86,7 +89,7 @@
         
         
         
-        public function createNewRegisterUser($username, $password, $email){
+        public function createNewRegisterUser($username, $password, $email, $fname, $lname, $num){
             
             
             $isEmailExisting = $this->isEmailExist($email);
@@ -111,7 +114,7 @@
                     $isValid = $this->isValidEmail($email);
                 
                     if($isValid){
-                        $query = "insert into ".$this->db_table." (username, password, email, created_at, updated_at) values ('$username', '$password', '$email', NOW(), NOW())";
+                        $query = "insert into ".$this->db_table." (username, fname, lname, num, password, email, created_at, updated_at) values ('$username', '$fname', '$lname', '$num', '$password', '$email', NOW(), NOW())";
                 
                         $inserted = mysqli_query($this->db->getDb(), $query);
                 
@@ -153,6 +156,9 @@
                 
                 $json['id'] = $canUserLogin['id'];
                 $json['username'] = $canUserLogin['username'];
+                $json['fname'] = $canUserLogin['fname'];
+                $json['lname'] = $canUserLogin['lname'];
+                $json['num'] = $canUserLogin['num'];
                 $json['email'] = $canUserLogin['email'];
                 $json['password'] = $canUserLogin['password'];
                 $json['success'] = 1;
@@ -165,7 +171,7 @@
             return $json;
         }
 
-        public function updateInfo($userid,$username,$email){
+        public function updateInfo($userid,$username,$email,$fname,$lname,$num){
 
             $check = $this->isEmailExist2($userid, $email);
             if($check){
@@ -177,7 +183,7 @@
                     $row[0]['result'] = 'Username already Exists';
                 }
                 else{
-                    $this->updateInfo2($userid, $username, $email);
+                    $this->updateInfo2($userid, $username, $email,$fname,$lname,$num);
                     $row[0]['result'] = 'success';
                 }
             }
@@ -207,9 +213,9 @@
             $i = mysqli_query($this->db->getDb(), $query);
         }
 
-        public function updateInfo2($userid,$username,$email){
+        public function updateInfo2($userid,$username,$email,$fname,$lname,$num){
 
-            $query = "update users set username='$username', email = '$email', updated_at = NOW() where id = '$userid'";
+            $query = "update users set username='$username', fname='$fname', lname='$lname', num='$num', email = '$email', updated_at = NOW() where id = '$userid'";
             $i = mysqli_query($this->db->getDb(), $query);
 
         }

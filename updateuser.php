@@ -6,6 +6,12 @@
     
     $username = "";
 
+    $fname = "";
+
+    $lname = "";
+
+    $num = "";
+
     $email = "";
 
     $curpass = "";
@@ -22,6 +28,24 @@
     if(isset($_POST['username'])){
         
         $username = $_POST['username'];
+        
+    }
+
+    if(isset($_POST['fname'])){
+        
+        $fname = $_POST['fname'];
+        
+    }
+
+    if(isset($_POST['lname'])){
+        
+        $lname = $_POST['lname'];
+        
+    }
+
+    if(isset($_POST['num'])){
+        
+        $num = $_POST['num'];
         
     }
 
@@ -48,9 +72,9 @@
     
     // Update Info
     
-    if(!empty($username) && !empty($email)){
+    if(!empty($username) && !empty($email) && !empty($fname) && !empty($lname) && !empty($num)){
         
-        $json_array = $userObject->updateInfo($userid,$username,$email);
+        $json_array = $userObject->updateInfo($userid,$username,$email,$fname,$lname,$num);
         
         echo json_encode($json_array);
         
