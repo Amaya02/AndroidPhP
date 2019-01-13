@@ -270,5 +270,116 @@
             }
             mysqli_close($this->db->getDb());
         }
+
+        public function updateToken($id,$token){
+            $query = "update users set fcm_regid='$token' , updated_at = NOW() where id = '$id'";
+            $i = mysqli_query($this->db->getDb(), $query);
+            $row[0]['result'] = 'success';
+            return $row;
+        }
+
+        public function restartAlarm($id){
+            date_default_timezone_set('Asia/Singapore');
+            $date = date('Y-m-d');
+            $status = "Pending";
+            $query = "select * from user_transac where userid = '$id' and status = '$status'";
+            $i = mysqli_query($this->db->getDb(), $query);
+            $num_rows = mysqli_num_rows($i);
+            while($row = mysqli_fetch_array($i)){
+                if($row['esti_date']>=$date){
+                    $r[]=$row;
+                }
+            }
+            if($num_rows==0){
+                $r[0]['result']="empty";
+                return $r;
+            }
+            else{
+                $r[0]['result']="success";
+                $r[0]['date_now'] = date('Y-m-d');
+                $r[0]['time_now'] = date('H:i:s');
+                return $r;
+            }
+        }
+
+        public function getAlarm($id,$tN){
+            date_default_timezone_set('Asia/Singapore');
+            $date = date('Y-m-d');
+            $time = $tN;
+            $status = "Pending";
+
+            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.companyid, company.companyname from user_transac INNER JOIN transaction ON user_transac.transacid=transaction.transacid INNER JOIN company ON transaction.companyid=company.companyid where userid = '$id' and status = '$status' and esti_date = '$date' and esti_start = '$time' LIMIT 1";
+
+            $i = mysqli_query($this->db->getDb(), $query);
+            $num_rows = mysqli_num_rows($i);
+            
+            if($num_rows==0){
+                $r[0]['result']="empty";
+                return $r;
+            }
+            else{
+                $row = mysqli_fetch_array($i);
+                $r[0]['u_tranid']=$row['u_tranid'];
+                $r[0]['companyname']=$row['companyname'];
+                $r[0]['transacname']=$row['transacname'];
+                $r[0]['result']="success";
+                $uid = $r[0]['u_tranid'];
+                return $r;
+            }
+        }
+
+        public function getAlarm1($id,$tN){
+            date_default_timezone_set('Asia/Singapore');
+            $date = date('Y-m-d');
+            $time = $tN;
+            $status = "Pending";
+            $time = date('H:i',strtotime($time. ' + 1 hours'));
+
+            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.companyid, company.companyname from user_transac INNER JOIN transaction ON user_transac.transacid=transaction.transacid INNER JOIN company ON transaction.companyid=company.companyid where userid = '$id' and status = '$status' and esti_date = '$date' and esti_start = '$time' LIMIT 1";
+
+            $i = mysqli_query($this->db->getDb(), $query);
+            $num_rows = mysqli_num_rows($i);
+            
+            if($num_rows==0){
+                $r[0]['result']="empty";
+                return $r;
+            }
+            else{
+                $row = mysqli_fetch_array($i);
+                $r[0]['u_tranid']=$row['u_tranid'];
+                $r[0]['companyname']=$row['companyname'];
+                $r[0]['transacname']=$row['transacname'];
+                $r[0]['result']="success";
+                $uid = $r[0]['u_tranid'];
+                return $r;
+            }
+        }
+
+        public function getAlarm2($id,$tN){
+            date_default_timezone_set('Asia/Singapore');
+            $date = date('Y-m-d');
+            $time = $tN;
+            $status = "Pending";
+            $time = date('H:i',strtotime($time. ' + 2 minutes'));
+
+            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.companyid, company.companyname from user_transac INNER JOIN transaction ON user_transac.transacid=transaction.transacid INNER JOIN company ON transaction.companyid=company.companyid where userid = '$id' and status = '$status' and esti_date = '$date' and esti_start = '$time' LIMIT 1";
+
+            $i = mysqli_query($this->db->getDb(), $query);
+            $num_rows = mysqli_num_rows($i);
+            
+            if($num_rows==0){
+                $r[0]['result']="empty";
+                return $r;
+            }
+            else{
+                $row = mysqli_fetch_array($i);
+                $r[0]['u_tranid']=$row['u_tranid'];
+                $r[0]['companyname']=$row['companyname'];
+                $r[0]['transacname']=$row['transacname'];
+                $r[0]['result']="success";
+                $uid = $r[0]['u_tranid'];
+                return $r;
+            }
+        }
     }
     ?>
