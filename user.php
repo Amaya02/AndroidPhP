@@ -381,5 +381,12 @@
                 return $r;
             }
         }
+
+        public function updateMes($id,$message){
+            $query = "update user_transac set message='$message' where u_tranid = '$id'";
+            $i = mysqli_query($this->db->getDb(), $query);
+            $row[0]['result'] = 'success';
+            return $row;
+        }
     }
     ?>
