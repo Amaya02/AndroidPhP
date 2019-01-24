@@ -58,7 +58,7 @@
 
         public function getTransaction($userid, $status){
 
-            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.companyid, company.companyname from ".$this->db_table." INNER JOIN ".$this->db_table2." ON user_transac.transacid=transaction.transacid INNER JOIN ".$this->db_table3." ON transaction.companyid=company.companyid where user_transac.userid='$userid' AND user_transac.status='$status'";
+            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.transacid, transaction.companyid, company.companyname from ".$this->db_table." INNER JOIN ".$this->db_table2." ON user_transac.transacid=transaction.transacid INNER JOIN ".$this->db_table3." ON transaction.companyid=company.companyid where user_transac.userid='$userid' AND user_transac.status='$status'";
 
             $i = mysqli_query($this->db->getDb(), $query);
 
