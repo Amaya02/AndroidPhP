@@ -188,7 +188,7 @@
                                         $min2 = (int)substr($date2,3,4);
                                         if($hour2>=date('H')){
                                             if($hour2==date('H')){
-                                                if($min2>=date('i')){
+                                                if($min2>date('i')){
                                                     $r2[$count]['estistart'] = $date2;
                                                     $count++;
                                                 }
@@ -209,7 +209,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $r2[$count]['estistart'] = $date2;
                                                 $count++;
                                             }
@@ -308,7 +308,7 @@
                                         $min2 = (int)substr($date2,3,4);
                                         if($hour2>=date('H')){
                                             if($hour2==date('H')){
-                                                if($min2>=date('i')){
+                                                if($min2>date('i')){
                                                     $r2[$count]['estistart'] = $date2;
                                                     $count++;
                                                 }
@@ -329,7 +329,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $r2[$count]['estistart'] = $date2;
                                                 $count++;
                                             }
@@ -363,7 +363,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $r2[$count]['estistart'] = $date2;
                                                 $count++;
                                             }
@@ -384,7 +384,7 @@
                                 $min2 = (int)substr($date2,3,4);
                                 if($hour2>=date('H')){
                                     if($hour2==date('H')){
-                                        if($min2>=date('i')){
+                                        if($min2>date('i')){
                                             $r2[$count]['estistart'] = $date2;
                                             $count++;
                                         }
@@ -416,7 +416,7 @@
                                         $min2 = (int)substr($date2,3,4);
                                         if($hour2>=date('H')){
                                             if($hour2==date('H')){
-                                                if($min2>=date('i')){
+                                                if($min2>date('i')){
                                                     $r2[$count]['estistart'] = $date2;
                                                     $count++;
                                                 }
@@ -437,7 +437,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $r2[$count]['estistart'] = $date2;
                                                 $count++;
                                             }
@@ -687,7 +687,7 @@
                                         $min2 = (int)substr($date2,3,4);
                                         if($hour2>=date('H')){
                                             if($hour2==date('H')){
-                                                if($min2>=date('i')){
+                                                if($min2>date('i')){
                                                     $er=0;
                                                     for($i=0; $i<count($r);$i++){
                                                         if($r2[0]['esti_date'] == $r[$i]['esti_date']){
@@ -734,7 +734,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $er=0;
                                                 for($i=0; $i<count($r);$i++){
                                                     if($r2[0]['esti_date'] == $r[$i]['esti_date']){
@@ -939,7 +939,7 @@
                                         $min2 = (int)substr($date2,3,4);
                                         if($hour2>=date('H')){
                                             if($hour2==date('H')){
-                                                if($min2>=date('i')){
+                                                if($min2>date('i')){
                                                     $er=0;
                                                     for($i=0; $i<count($r);$i++){
                                                         if($r2[0]['esti_date'] == $r[$i]['esti_date']){
@@ -986,7 +986,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $er=0;
                                                 for($i=0; $i<count($r);$i++){
                                                     if($r2[0]['esti_date'] == $r[$i]['esti_date']){
@@ -1046,7 +1046,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $er=0;
                                                 for($i=0; $i<count($r);$i++){
                                                     if($r2[0]['esti_date'] == $r[$i]['esti_date']){
@@ -1093,7 +1093,7 @@
                                 $min2 = (int)substr($date2,3,4);
                                 if($hour2>=date('H')){
                                     if($hour2==date('H')){
-                                        if($min2>=date('i')){
+                                        if($min2>date('i')){
                                             $er=0;
                                             for($i=0; $i<count($r);$i++){
                                                 if($r2[0]['esti_date'] == $r[$i]['esti_date']){
@@ -1151,7 +1151,7 @@
                                         $min2 = (int)substr($date2,3,4);
                                         if($hour2>=date('H')){
                                             if($hour2==date('H')){
-                                                if($min2>=date('i')){
+                                                if($min2>date('i')){
                                                     $er=0;
                                                     for($i=0; $i<count($r);$i++){
                                                         if($r2[0]['esti_date'] == $r[$i]['esti_date']){
@@ -1198,7 +1198,7 @@
                                     $min2 = (int)substr($date2,3,4);
                                     if($hour2>=date('H')){
                                         if($hour2==date('H')){
-                                            if($min2>=date('i')){
+                                            if($min2>date('i')){
                                                 $er=0;
                                                 for($i=0; $i<count($r);$i++){
                                                     if($r2[0]['esti_date'] == $r[$i]['esti_date']){
