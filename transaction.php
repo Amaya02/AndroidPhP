@@ -21,28 +21,50 @@
                 return $json;
             }
             else{
-                $query = "insert into ".$this->db_table."(userid, transacid, status, date_tran, esti_date, esti_start) values ('$userid', '$transacid', '$status', NOW(), '$date', '$start')";
-                
-                $inserted = mysqli_query($this->db->getDb(), $query);
-                    
-                if($inserted == 1){
-                                
-                    $json[0]['result'] = "success";
-                        
-                }else{
-                        
-                    $json[0]['result'] = "error";
-                        
+                $check = $this->checkTransaction2($userid, $transacid,$status,$date,$start);
+                if($check){
+                    $json[0]['result'] = "error3";
+                    return $json;
                 }
-                    
-                mysqli_close($this->db->getDb());
+                else{
+                    $query = "insert into ".$this->db_table."(userid, transacid, status, date_tran, esti_date, esti_start) values ('$userid', '$transacid', '$status', NOW(), '$date', '$start')";
                 
-                return $json;
+                    $inserted = mysqli_query($this->db->getDb(), $query);
+                        
+                    if($inserted == 1){
+                                    
+                        $json[0]['result'] = "success";
+                            
+                    }else{
+                            
+                        $json[0]['result'] = "error";
+                            
+                    }
+                        
+                    mysqli_close($this->db->getDb());
+                    
+                    return $json;
+                }
             }
         }
 
         public function checkTransaction($userid, $transacid,$status,$date,$start){
             $query = "select * from user_transac where transacid = '$transacid' AND status = '$status' AND esti_date = '$date' AND esti_start = '$start'";
+            $result = mysqli_query($this->db->getDb(), $query);
+            
+            if(mysqli_num_rows($result) > 0){
+                return true;
+            }
+            else{
+                return false;
+            }
+
+            mysqli_close($this->db->getDb());
+            
+        }
+
+        public function checkTransaction2($userid, $transacid,$status,$date,$start){
+            $query = "select * from user_transac where transacid = '$transacid' AND status = '$status' AND userid = $userid";
             $result = mysqli_query($this->db->getDb(), $query);
             
             if(mysqli_num_rows($result) > 0){
@@ -1392,6 +1414,9 @@
 
         }
 
+
         
     }
+
+
 ?>
