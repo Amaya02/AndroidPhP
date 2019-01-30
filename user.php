@@ -385,8 +385,71 @@
             }
         }
 
+        public function getAlarm3($id,$tN){
+            date_default_timezone_set('Asia/Singapore');
+            $date = date('Y-m-d');
+            $time = $tN;
+            $status = "Pending";
+            $time = date('H:i',strtotime($time. ' + 10 minutes'));
+
+            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.transacid, transaction.companyid, company.companyname from user_transac INNER JOIN transaction ON user_transac.transacid=transaction.transacid INNER JOIN company ON transaction.companyid=company.companyid where userid = '$id' and status = '$status' and esti_date = '$date' and esti_start = '$time' LIMIT 1";
+
+            $i = mysqli_query($this->db->getDb(), $query);
+            $num_rows = mysqli_num_rows($i);
+            
+            if($num_rows==0){
+                $r[0]['result']="empty";
+                return $r;
+            }
+            else{
+                $row = mysqli_fetch_array($i);
+                $r[0]['u_tranid']=$row['u_tranid'];
+                $r[0]['companyname']=$row['companyname'];
+                $r[0]['transacname']=$row['transacname'];
+                $r[0]['transacid']=$row['transacid'];
+                $r[0]['result']="success";
+                $uid = $r[0]['u_tranid'];
+                return $r;
+            }
+        }
+
+        public function getAlarm4($id,$tN){
+            date_default_timezone_set('Asia/Singapore');
+            $date = date('Y-m-d');
+            $time = $tN;
+            $status = "Pending";
+            $time = date('H:i',strtotime($time. ' + 30 minutes'));
+
+            $query = "select user_transac.u_tranid, user_transac.transacid, user_transac.date_tran, user_transac.esti_date, user_transac.esti_start, user_transac.status, transaction.transacname, transaction.transacid, transaction.companyid, company.companyname from user_transac INNER JOIN transaction ON user_transac.transacid=transaction.transacid INNER JOIN company ON transaction.companyid=company.companyid where userid = '$id' and status = '$status' and esti_date = '$date' and esti_start = '$time' LIMIT 1";
+
+            $i = mysqli_query($this->db->getDb(), $query);
+            $num_rows = mysqli_num_rows($i);
+            
+            if($num_rows==0){
+                $r[0]['result']="empty";
+                return $r;
+            }
+            else{
+                $row = mysqli_fetch_array($i);
+                $r[0]['u_tranid']=$row['u_tranid'];
+                $r[0]['companyname']=$row['companyname'];
+                $r[0]['transacname']=$row['transacname'];
+                $r[0]['transacid']=$row['transacid'];
+                $r[0]['result']="success";
+                $uid = $r[0]['u_tranid'];
+                return $r;
+            }
+        }
+
         public function updateMes($id,$message){
             $query = "update user_transac set message='$message' where u_tranid = '$id'";
+            $i = mysqli_query($this->db->getDb(), $query);
+            $row[0]['result'] = 'success';
+            return $row;
+        }
+
+        public function updateStat($id,$status){
+            $query = "update user_transac set status='$status' where u_tranid = '$id'";
             $i = mysqli_query($this->db->getDb(), $query);
             $row[0]['result'] = 'success';
             return $row;

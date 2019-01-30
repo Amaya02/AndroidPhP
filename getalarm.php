@@ -29,15 +29,19 @@
     // Update Info
 
     if($alarm=="0"){
-
     	$json_array = $userObject->getAlarm($id,$tN);
-
     }
     else if($alarm=="1"){
     	$json_array = $userObject->getAlarm1($id,$tN);
     }
     else if($alarm=="2"){
     	$json_array = $userObject->getAlarm2($id,$tN);
+    }
+    else if($alarm=="3"){
+        $json_array = $userObject->getAlarm3($id,$tN);
+    }
+    else if($alarm=="4"){
+        $json_array = $userObject->getAlarm4($id,$tN);
     }
         
         
